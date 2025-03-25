@@ -30,9 +30,7 @@ def extract_text(file_storage):
     filename = file_storage.filename.lower()
     if filename.endswith(".pdf"):
         return extract_text_pdf(file_storage)
-    elif filename.endswith(".docx"):
-        return extract_text_docx(file_storage)
-    elif filename.endswith(".doc"):
+    elif filename.endswith(".docx") or filename.endswith(".doc"):
         return extract_text_docx(file_storage)
     else:
         return ""
@@ -89,12 +87,13 @@ def generate_report():
     doc1 = request.files.get('doc1')
     doc2 = request.files.get('doc2')
 
-    if not framework:
-        return jsonify({'error': 'Consultation Framework is required.'}), 400
-
-    context = extract_text(framework)
+    context = ""
+    if framework: context += extract_text(framework)
     if doc1: context += "\n" + extract_text(doc1)
     if doc2: context += "\n" + extract_text(doc2)
+
+    if not context.strip():
+        return jsonify({'error': 'No valid input provided.'}), 400
 
     doc = Document()
     add_logo(doc)
